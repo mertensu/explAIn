@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+from tensorflow.python.training.training_util import global_step
 
 
 class Trainer():
@@ -7,7 +8,9 @@ class Trainer():
     A helper class which provides basic methods to train a model.
     """
 
-    def __init__(self, model, opt, loss_func = None, metric=None, n_epochs=None, n_iters=None):
+    def __init__(self, model, opt, loss_func = None,
+                 metric=None, n_epochs=None, n_iters=None,
+                 save_path=None):
         """
         :param model: an instance of class RegressionLearner
         :param opt: the optimizer to use
@@ -15,6 +18,7 @@ class Trainer():
         :param metric: the metric of choice
         :param n_epochs: the number of epochs to train (if dataset_mode)
         :param n_iters: the number of batches to generate (if online_mode)
+        :param save_path: should models be saved (default: no (None))
         """
         self.model = model
         self.opt = opt
@@ -22,6 +26,7 @@ class Trainer():
         self.metric = metric
         self.n_epochs = n_epochs
         self.n_iters = n_iters
+        self.save_path = save_path
 
     def run(self):
         pass
@@ -38,17 +43,22 @@ class Trainer():
         :return: a list of training losses
         """
 
+        if self.save_path:
+            self.enable_checkpoint()
+
         losses = []
         # Run training loop
         for it in range(1, self.n_iters + 1):
             with tf.GradientTape() as tape:
-                # Generate data and parameters
+                # Generate batch
                 X_train, y_train = data_gen(batch_size)
                 y_train_hat = self.model(X_train)
                 loss_val = self.loss(y_train, y_train_hat)
 
             losses.append(loss_val.numpy())
+            # compute validation score
             val_score = self.compute_validation_score_online()
+            # update weights
             self.backpropagate(tape, loss_val)
 
             running_loss = loss_val.numpy() if it < n_smooth else np.mean(losses[-n_smooth:])
@@ -79,4 +89,16 @@ class Trainer():
         X_val, y_val = data_gen(batch_size)
         y_val_hat = self.model(X_val)
         return self.metric(y_val, y_val_hat)
+
+    def enable_checkpoint(self):
+        """
+        Store the last two model checkpoints to easily load model states.
+        :return: None
+        """
+        checkpoint = tf.train.Checkpoint(optimizer=self.opt, net=self.model)
+        manager = tf.train.CheckpointManager(checkpoint, self.save_path, max_to_keep=2)
+        checkpoint.restore(manager.latest_checkpoint)
+        if manager.latest_checkpoint:
+            print("Restored model from {}".format(manager.latest_checkpoint))
+
 
