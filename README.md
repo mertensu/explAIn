@@ -9,3 +9,7 @@ learns to be explainable without too much loss in predictive power.
 In the current version, all two-way interactions between features can also be incorporated into
 the model. In order to let the neural nets figure out the best possible combination of features,
 the input to the transforming net is a concatenation of features and not a multiplication.
+
+Although there is no insight into each transformation of features, the architecture is still
+explainable since each neural net only transforms a single feature. Hence, whatever transformation
+is applied, the resulting feature only incorporates information about the raw feature.  
