@@ -26,7 +26,6 @@ class Trainer():
         self.metric = metric
         self.n_epochs = n_epochs
         self.n_iters = n_iters
-        assert os.path.isdir(save_path), 'Directory does not exist'
         self.save_path = save_path
 
     def run(self):
@@ -44,7 +43,7 @@ class Trainer():
         :return: a list of training losses
         """
 
-        if self.save_path:
+        if self.save_path is not None:
             self.enable_checkpoint()
 
         losses = []
@@ -96,6 +95,7 @@ class Trainer():
         Store the last two model checkpoints to easily load model states.
         :return: None
         """
+        assert os.path.isdir(self.save_path), 'Directory does not exist'
         checkpoint = tf.train.Checkpoint(optimizer=self.opt, net=self.model)
         manager = tf.train.CheckpointManager(checkpoint, self.save_path, max_to_keep=2)
         checkpoint.restore(manager.latest_checkpoint)
