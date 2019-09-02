@@ -48,7 +48,7 @@ class Trainer():
                 loss_val = self.loss(y_train, y_train_hat)
 
             losses.append(loss_val.numpy())
-            val_score = self.compute_validation_score()
+            val_score = self.compute_validation_score_online()
             self.backpropagate(tape, loss_val)
 
             running_loss = loss_val.numpy() if it < n_smooth else np.mean(losses[-n_smooth:])
@@ -69,7 +69,7 @@ class Trainer():
         gradients = tape.gradient(loss_val, self.model.trainable_variables)
         self.opt.apply_gradients(zip(gradients, self.model.trainable_variables))
 
-    def compute_validation_score(self, data_gen, batch_size):
+    def compute_validation_score_online(self, data_gen, batch_size):
         """
         Compute the metric on a validation batch.
         :param data_gen: The data generator as used for training.
