@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from tensorflow.python.training.training_util import global_step
+import os
 
 
 class Trainer():
@@ -26,6 +26,7 @@ class Trainer():
         self.metric = metric
         self.n_epochs = n_epochs
         self.n_iters = n_iters
+        assert os.path.isdir(save_path), 'Directory does not exist'
         self.save_path = save_path
 
     def run(self):
