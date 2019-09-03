@@ -46,20 +46,21 @@ class Trainer():
         if self.save_path is not None:
             self.enable_checkpoint()
 
-        losses = []
+        # initialize an instance to calculate weighted means of loss
+        self.init_weighted_mean()
+
         # Run training loop
         for it in range(1, self.n_iters + 1):
-            with tf.GradientTape() as tape:
-                # Generate batch
-                X_train, y_train = data_gen(batch_size)
-                y_train_hat = self.model(X_train)
-                loss_val = self.loss(y_train, y_train_hat)
 
-            losses.append(loss_val.numpy())
+            X, y = data_gen(batch_size)
+
+            @tf.function
+            self.train_loop(X,y)
+
             # compute validation score
             val_score = self.compute_validation_score_online()
             # update weights
-            self.backpropagate(tape, loss_val)
+
 
             running_loss = loss_val.numpy() if it < n_smooth else np.mean(losses[-n_smooth:])
             p_bar.set_postfix_str(
@@ -68,6 +69,17 @@ class Trainer():
             p_bar.update(1)
 
         return losses
+
+    def init_weighted_mean(self):
+        self.train_loss = tf.keras.metrics.Mean(name='train loss')
+        self.val_loss = tf.keras.metrics.Mean(name='val loss')
+
+    def train_loop(self,X,y):
+        with tf.GradientTape() as tape:
+            y_hat = self.model(X)
+            loss_val = self.loss_func(y, y_hat)
+        self.backpropagate(tape,loss_val)
+        self.train_loss(loss_val)
 
     def backpropagate(self, tape, loss_val):
         """
