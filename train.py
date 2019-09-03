@@ -15,7 +15,7 @@ class Trainer():
         :param model: an instance of class RegressionLearner
         :param opt: the optimizer to use
         :param loss_func: the loss function of choice
-        :param metric: the metric of choice
+        :param metric: the metric of choice (has to be tf.keras.metric.?? object)
         :param n_epochs: the number of epochs to train (if dataset_mode)
         :param n_iters: the number of batches to generate (if online_mode)
         :param save_path: should models be saved (default: no (None))
@@ -31,7 +31,7 @@ class Trainer():
     def run(self):
         pass
 
-    def run_online(self, data_gen, batch_size, p_bar, n_smooth=100):
+    def run_online(self, data_gen, batch_size):
         """
         Train a model using online-mode, i.e. if a function to generate
         batches of data is available.
@@ -53,14 +53,12 @@ class Trainer():
         for it in range(1, self.n_iters + 1):
 
             X, y = data_gen(batch_size)
-
-            @tf.function
+            # forward and backward pass
             self.train_loop(X,y)
 
+            X_val, y_val = data_gen(batch_size)
             # compute validation score
-            val_score = self.compute_validation_score_online()
-            # update weights
-
+            self.compute_validation_metric(X_val, y_val)
 
             running_loss = loss_val.numpy() if it < n_smooth else np.mean(losses[-n_smooth:])
             p_bar.set_postfix_str(
@@ -74,6 +72,7 @@ class Trainer():
         self.train_loss = tf.keras.metrics.Mean(name='train loss')
         self.val_loss = tf.keras.metrics.Mean(name='val loss')
 
+    @tf.function
     def train_loop(self,X,y):
         with tf.GradientTape() as tape:
             y_hat = self.model(X)
@@ -91,16 +90,18 @@ class Trainer():
         gradients = tape.gradient(loss_val, self.model.trainable_variables)
         self.opt.apply_gradients(zip(gradients, self.model.trainable_variables))
 
-    def compute_validation_score_online(self, data_gen, batch_size):
+    @tf.function
+    def compute_validation_metric(self, X_val, y_val):
         """
         Compute the metric on a validation batch.
         :param data_gen: The data generator as used for training.
         :param batch_size: The batch size of the validation batch.
         :return: The metric of interest (scalar).
         """
-        X_val, y_val = data_gen(batch_size)
         y_val_hat = self.model(X_val)
-        return self.metric(y_val, y_val_hat)
+        loss_val = self.loss_func(y_val, y_val_hat)
+        self.val_loss(loss_val)
+        self.metric(y_val, y_val_hat)
 
     def enable_checkpoint(self):
         """
