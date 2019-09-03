@@ -78,14 +78,15 @@ class RegressionLearner(tf.keras.Model):
         transformed_features = tf.stack([self.transformers[i](x[:, i][:, tf.newaxis])
                                          for i in range(self.nfeatures)], axis=1)[:, :, 0]
 
-        # build list of tensors with concatenated features
-        x_int = self.construct_interactions(x)
+        if self.nints > 0:
+            # build list of tensors with concatenated features
+            x_int = self.construct_interactions(x)
 
-        # transform interactions terms
-        transformed_ints = tf.stack([self.transformers[i](x_int[i - self.nfeatures])
+            # transform interactions terms
+            transformed_ints = tf.stack([self.transformers[i](x_int[i - self.nfeatures])
                                      for i in range(self.nfeatures, self.nfeatures + self.nints)], axis=1)[:, :, 0]
 
-        # run simple dense layer (multiple regression)
-        out = self.regression(tf.concat([transformed_features, transformed_ints], axis=-1))
+            # run simple dense layer (multiple regression)
+            return self.regression(tf.concat([transformed_features, transformed_ints], axis=-1))
 
-        return out
+        return self.regression(transformed_features)
