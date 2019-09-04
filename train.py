@@ -1,5 +1,6 @@
 import tensorflow as tf
 from fastprogress import master_bar, progress_bar
+import matplotlib.pyplot as plt
 import os
 
 
@@ -147,4 +148,10 @@ class Trainer():
         else:
             print('Initializing manager to store model states after each epoch.')
 
+    def visualise_transformation(self, data_gen, batch_size):
+        """
+        Plot for each feature its raw version versus the transformed one.
+        :return: a matrix of individual plots
+        """
+        pass
 
