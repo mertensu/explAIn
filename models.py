@@ -17,16 +17,18 @@ class FeatureTransformer(tf.keras.Model):
         self.model = tf.keras.Sequential(
             [tf.keras.layers.Dense(n_units, activation='relu')
              for i in range(n_layers)] +
-            [tf.keras.layers.Dense(1)]
+            [tf.keras.layers.Dense(1)] +
+            [tf.keras.layers.BatchNormalization()]
         )
 
-    def call(self, x):
+    def call(self, x, training=True):
         """
         Run input through dense layers.
         :param x: input of shape (batch_size, 1)
+        :param training: how to normalize input
         :return: transformed input of shape (batch_size, 1)
         """
-        return self.model(x)
+        return self.model(x,training=training)
 
 
 class RegressionLearner(tf.keras.Model):
