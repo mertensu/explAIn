@@ -69,7 +69,8 @@ class Trainer():
                 .format(it, running_loss, val_score.numpy()))
             p_bar.update(1)
 
-        return losses
+            # Reset the metrics for the next epoch
+            self.reset_aggregators()
 
     def init_aggregators(self):
         """
@@ -79,6 +80,15 @@ class Trainer():
         """
         self.train_loss = tf.keras.metrics.Mean(name='train loss')
         self.val_loss = tf.keras.metrics.Mean(name='val loss')
+
+    def reset_aggregators(self):
+        """
+        Reset the weighted mean of the training loss and the validation metric
+        to start anew in the next epoch.
+        :return: None
+        """
+        self.train_loss.reset_states()
+        self.metric.reset_states()
 
     @tf.function
     def train_loop(self,X,y):
