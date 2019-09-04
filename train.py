@@ -10,7 +10,7 @@ class Trainer():
     A helper class which provides basic methods to train a model.
     """
 
-    def __init__(self, model, opt, loss_func = None,
+    def __init__(self, model, opt, loss_func=None,
                  metric=None, n_epochs=None, n_iters_per_epoch=None,
                  save_path=None):
         """
@@ -62,10 +62,9 @@ class Trainer():
 
             # Run training loop
             for it in progress_bar(range(1, self.n_iters + 1), parent=mb):
-
                 X, y = data_gen(batch_size)
                 # forward and backward pass
-                self.train_loop(X,y)
+                self.train_loop(X, y)
 
                 X_val, y_val = data_gen(batch_size)
                 # compute validation score
@@ -97,7 +96,7 @@ class Trainer():
         self.metric.reset_states()
 
     @tf.function
-    def train_loop(self,X,y):
+    def train_loop(self, X, y):
         """
         Run forward and backward pass for a single batch and update
         aggregator.
@@ -108,7 +107,7 @@ class Trainer():
         with tf.GradientTape() as tape:
             y_hat = self.model(X)
             loss_val = self.loss_func(y, y_hat)
-        self.backpropagate(tape,loss_val)
+        self.backpropagate(tape, loss_val)
         self.train_loss(loss_val)
 
     def backpropagate(self, tape, loss_val):
@@ -160,8 +159,8 @@ class Trainer():
 
         X_test, _ = data_gen(batch_size)
 
-        n_col = int(np.ceil(n_plots/2))
-        f, axarr = plt.subplots(nrows=2,ncols=n_col,figsize=(10,7))
+        n_col = int(np.ceil(n_plots / 2))
+        f, axarr = plt.subplots(nrows=2, ncols=n_col, figsize=(10, 7))
 
         for i, ax in enumerate(axarr.flat):
 
@@ -172,14 +171,11 @@ class Trainer():
             if i == n_plots:
                 break
 
-            inp = tf.expand_dims(X_test[:, i],-1)
-            ax.scatter(inp, self.model.transformers[i].model(inp),color='black')
+            inp = tf.expand_dims(X_test[:, i], -1)
+            ax.scatter(inp, self.model.transformers[i].model(inp), color='black')
 
-            ax.set_title(f'Feature {i+1}')
+            ax.set_title(f'Feature {i + 1}')
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
 
         f.tight_layout()
-
-
-

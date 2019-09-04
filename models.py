@@ -6,7 +6,6 @@ class FeatureTransformer(tf.keras.Model):
     """
     Non-linear transformation of a feature via simple NN.
     """
-
     def __init__(self, n_layers=2, n_units=3):
         """
         Initialise dense net as the non-linear transformation.

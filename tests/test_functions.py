@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from models import FeatureTransformer,RegressionLearner
+from models import FeatureTransformer, RegressionLearner
 
 
 def test_transformer_shape():
@@ -9,9 +9,9 @@ def test_transformer_shape():
     :return: None
     """
     batch_size = 64
-    inp = np.empty(shape=(batch_size,1))
+    inp = np.empty(shape=(batch_size, 1))
     transformer = FeatureTransformer()
-    assert transformer(inp).numpy().shape == (batch_size,1)
+    assert transformer(inp).numpy().shape == (batch_size, 1)
 
 
 def test_reglearner_shape():
@@ -24,5 +24,3 @@ def test_reglearner_shape():
     reglearner = RegressionLearner(n_features)
     predictions = reglearner(dataset)
     assert predictions.shape == (batch_size, 1)
-
-
