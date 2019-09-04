@@ -71,8 +71,8 @@ class Trainer():
                 self.compute_validation_metric(X_val, y_val)
 
             mb.write(f'Epoch {epoch}, '
-                     f'Loss: {self.train_loss.result():.3f}, '
-                     f'Val metric: {self.metric.result():.3f}')
+                     f'{self.train_loss.name}: {self.train_loss.result():.3f}, '
+                     f'{self.metric.name}: {self.metric.result():.3f}')
 
             # Reset the metrics for the next epoch
             self.reset_aggregators()
