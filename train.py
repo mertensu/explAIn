@@ -50,24 +50,27 @@ class Trainer():
             self.check_for_previous_models()
 
         # initialize an instance to calculate weighted means of loss
-        self.init_weighted_mean()
+        self.init_aggregators()
 
-        # Run training loop
-        for it in range(1, self.n_iters + 1):
+        mb = master_bar(range(1, self.n_epochs + 1))
+        for epoch in mb:
+        #for epoch in range(1, self.n_epochs + 1):
 
-            X, y = data_gen(batch_size)
-            # forward and backward pass
-            self.train_loop(X,y)
+            # Run training loop
+            for it in progress_bar(range(1, self.n_iters + 1), parent=mb):
+            #for it in range(1, self.n_iters + 1):
 
-            X_val, y_val = data_gen(batch_size)
-            # compute validation score
-            self.compute_validation_metric(X_val, y_val)
+                X, y = data_gen(batch_size)
+                # forward and backward pass
+                self.train_loop(X,y)
 
-            running_loss = loss_val.numpy() if it < n_smooth else np.mean(losses[-n_smooth:])
-            p_bar.set_postfix_str(
-                "Iteration: {0}, Training Loss: {2:.3f}, Val Score: {2:.3f}"
-                .format(it, running_loss, val_score.numpy()))
-            p_bar.update(1)
+                X_val, y_val = data_gen(batch_size)
+                # compute validation score
+                self.compute_validation_metric(X_val, y_val)
+
+            mb.write(f'Epoch {epoch}, '
+                     f'Loss: {self.train_loss.result():.3f}, '
+                     f'Val metric: {self.metric.result():.3f}')
 
             # Reset the metrics for the next epoch
             self.reset_aggregators()
