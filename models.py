@@ -14,7 +14,7 @@ class FeatureTransformer(tf.keras.Model):
         """
         super(FeatureTransformer, self).__init__()
         self.model = tf.keras.Sequential(
-            [tf.keras.layers.Dense(n_units, activation='relu')
+            [tf.keras.layers.Dense(n_units, activation='sigmoid')
              for i in range(n_layers)] +
             [tf.keras.layers.Dense(1)] +
             [tf.keras.layers.BatchNormalization()]
