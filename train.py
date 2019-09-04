@@ -57,11 +57,9 @@ class Trainer():
 
         mb = master_bar(range(1, self.n_epochs + 1))
         for epoch in mb:
-        #for epoch in range(1, self.n_epochs + 1):
 
             # Run training loop
             for it in progress_bar(range(1, self.n_iters + 1), parent=mb):
-            #for it in range(1, self.n_iters + 1):
 
                 X, y = data_gen(batch_size)
                 # forward and backward pass
