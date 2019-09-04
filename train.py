@@ -1,5 +1,5 @@
 import tensorflow as tf
-import numpy as np
+from fastprogress import master_bar, progress_bar
 import os
 
 
@@ -9,7 +9,7 @@ class Trainer():
     """
 
     def __init__(self, model, opt, loss_func = None,
-                 metric=None, n_epochs=None, n_iters=None,
+                 metric=None, n_epochs=None, n_iters_per_epoch=None,
                  save_path=None):
         """
         :param model: an instance of class RegressionLearner
@@ -17,7 +17,7 @@ class Trainer():
         :param loss_func: the loss function of choice
         :param metric: the metric of choice (has to be tf.keras.metric.?? object)
         :param n_epochs: the number of epochs to train (if dataset_mode)
-        :param n_iters: the number of batches to generate (if online_mode)
+        :param n_iters_per_epoch: the number of batches to generate per epoch (only in online-mode)
         :param save_path: should models be saved (default: no (None))
         """
         self.model = model
@@ -25,7 +25,7 @@ class Trainer():
         self.loss_func = loss_func
         self.metric = metric
         self.n_epochs = n_epochs
-        self.n_iters = n_iters
+        self.n_iters = n_iters_per_epoch
         self.save_path = save_path
 
     def run(self):
