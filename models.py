@@ -34,9 +34,11 @@ class RegressionLearner(tf.keras.Model):
     """
     Implementation of the 'generalized additive machine'
     """
-    def __init__(self, n_features, build_interactions=True):
+    def __init__(self, n_features, n_layers, n_units, build_interactions=True):
         """
         :param n_features: number of features in the data.
+        :param n_layers: number of layers in the FeaturesTransformer.
+        :param n_units: number of hidden units in the FeatureTransformer.
         :param build_interactions: should two-way interaction be included; default: True
         """
         super(RegressionLearner, self).__init__()
@@ -44,7 +46,7 @@ class RegressionLearner(tf.keras.Model):
         self.nints = 0
         if build_interactions:
             self.nints = len(self.determine_ninteractions())
-        self.transformers = [FeatureTransformer() for i in range(n_features + self.nints)]
+        self.transformers = [FeatureTransformer(n_layers, n_units) for i in range(n_features + self.nints)]
         self.regression = tf.keras.layers.Dense(1)
 
     def determine_ninteractions(self):
