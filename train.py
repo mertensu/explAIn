@@ -95,6 +95,13 @@ class Trainer():
 
     @tf.function
     def train_loop(self,X,y):
+        """
+        Run forward and backward pass for a single batch and update
+        aggregator.
+        :param X: a tensor of shape (batch_size, n_features)
+        :param y: a tensor of shape (batch_size, 1) containing the true labels
+        :return: None
+        """
         with tf.GradientTape() as tape:
             y_hat = self.model(X)
             loss_val = self.loss_func(y, y_hat)
@@ -103,7 +110,7 @@ class Trainer():
 
     def backpropagate(self, tape, loss_val):
         """
-        Compute gradients and run update weights.
+        Compute gradients and update weights.
         :param tape: The tape storing all calculations.
         :param loss_val: the current loss value.
         :return: None
@@ -114,10 +121,10 @@ class Trainer():
     @tf.function
     def compute_validation_metric(self, X_val, y_val):
         """
-        Compute the metric on a validation batch.
+        Compute the metric on a validation batch and update aggregator.
         :param data_gen: The data generator as used for training.
         :param batch_size: The batch size of the validation batch.
-        :return: The metric of interest (scalar).
+        :return: None
         """
         y_val_hat = self.model(X_val)
         loss_val = self.loss_func(y_val, y_val_hat)
