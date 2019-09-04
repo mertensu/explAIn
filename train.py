@@ -28,6 +28,9 @@ class Trainer():
         self.n_iters = n_iters_per_epoch
         self.save_path = save_path
 
+        self.checkpoint = None
+        self.manger = None
+
     def run(self):
         pass
 
@@ -44,7 +47,7 @@ class Trainer():
         """
 
         if self.save_path is not None:
-            self.enable_checkpoint()
+            self.check_for_previous_models()
 
         # initialize an instance to calculate weighted means of loss
         self.init_weighted_mean()
@@ -68,7 +71,12 @@ class Trainer():
 
         return losses
 
-    def init_weighted_mean(self):
+    def init_aggregators(self):
+        """
+        Initialize an instance to compute the weighted mean of the
+        training loss and the validation metric.
+        :return: None
+        """
         self.train_loss = tf.keras.metrics.Mean(name='train loss')
         self.val_loss = tf.keras.metrics.Mean(name='val loss')
 
@@ -103,16 +111,19 @@ class Trainer():
         self.val_loss(loss_val)
         self.metric(y_val, y_val_hat)
 
-    def enable_checkpoint(self):
+    def check_for_previous_models(self):
         """
+        Check if architecture was already trained and load model state.
         Store the last two model checkpoints to easily load model states.
         :return: None
         """
         assert os.path.isdir(self.save_path), 'Directory does not exist'
-        checkpoint = tf.train.Checkpoint(optimizer=self.opt, net=self.model)
-        manager = tf.train.CheckpointManager(checkpoint, self.save_path, max_to_keep=2)
-        checkpoint.restore(manager.latest_checkpoint)
-        if manager.latest_checkpoint:
-            print("Restored model from {}".format(manager.latest_checkpoint))
+        self.checkpoint = tf.train.Checkpoint(optimizer=self.opt, net=self.model)
+        self.manager = tf.train.CheckpointManager(self.checkpoint, self.save_path, max_to_keep=2)
+        self.checkpoint.restore(self.manager.latest_checkpoint)
+        if self.manager.latest_checkpoint:
+            print("Loading previously trained model from {}".format(self.manager.latest_checkpoint))
+        else:
+            print('Initializing manager to store model states after each epoch.')
 
 
