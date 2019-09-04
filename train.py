@@ -46,6 +46,9 @@ class Trainer():
         :return: a list of training losses
         """
 
+        if self.n_iters is None:
+            raise ValueError('If you want to run online-mode, please specify n_iters_per_epoch')
+
         if self.save_path is not None:
             self.check_for_previous_models()
 
