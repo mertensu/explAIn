@@ -1,6 +1,7 @@
 import tensorflow as tf
 from fastprogress import master_bar, progress_bar
 import matplotlib.pyplot as plt
+import numpy as np
 import os
 
 
@@ -153,5 +154,32 @@ class Trainer():
         Plot for each feature its raw version versus the transformed one.
         :return: a matrix of individual plots
         """
-        pass
+        n_plots = len(self.model.transformers)
+        if n_plots > 12:
+            raise ValueError(f'Too many features ({n_plots}) to visualize properly.')
+
+        X_test, _ = data_gen(batch_size)
+
+        n_col = int(np.ceil(n_plots/2))
+        f, axarr = plt.subplots(nrows=2,ncols=n_col,figsize=(10,7))
+
+        for i, ax in enumerate(axarr.flat):
+
+            if i == 0:
+                ax.set_xlabel('Raw')
+                ax.set_ylabel('Transformed')
+
+            if i == n_plots:
+                break
+
+            inp = tf.expand_dims(X_test[:, i],-1)
+            ax.scatter(inp, self.model.transformers[i].model(inp),color='black')
+
+            ax.set_title(f'Feature {i+1}')
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+
+        f.tight_layout()
+
+
 
