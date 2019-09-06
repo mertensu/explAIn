@@ -83,8 +83,8 @@ class Trainer():
         training loss and the validation metric.
         :return: None
         """
-        self.train_loss = tf.keras.metrics.Mean(name='train loss')
-        self.val_loss = tf.keras.metrics.Mean(name='val loss')
+        self.train_loss = tf.keras.metrics.Mean(name=f'Train_{self.loss_func.name}')
+        self.val_loss = tf.keras.metrics.Mean(name=f'Val{self.loss_func.name}')
 
     def reset_aggregators(self):
         """
