@@ -4,7 +4,10 @@ import itertools
 
 class FeatureTransformer(tf.keras.Model):
     """
-    Non-linear transformation of a feature via simple NN.
+    Non-linear transformation of a feature via simple NN. The network
+    has a sigmoid activation at the end to ensure the transformed feature
+    has the same range (0,1) as the original feature. Therefore, please use
+    min-max scaling on the raw features.
     """
     def __init__(self, n_layers=2, n_units=3):
         """
@@ -16,8 +19,7 @@ class FeatureTransformer(tf.keras.Model):
         self.model = tf.keras.Sequential(
             [tf.keras.layers.Dense(n_units, activation='sigmoid')
              for i in range(n_layers)] +
-            [tf.keras.layers.Dense(1)] +
-            [tf.keras.layers.BatchNormalization()]
+            [tf.keras.layers.Dense(1,activation='sigmoid')]
         )
 
     def call(self, x, training=True):
